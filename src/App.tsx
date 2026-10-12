@@ -18,6 +18,7 @@ import AdminRequestsPage from './pages/admin/AdminRequestsPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminAuditLogPage from './pages/admin/AdminAuditLogPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import SkillAIAssistant from './components/ai/SkillAIAssistant';
 
 function App() {
   useEffect(() => {
@@ -30,30 +31,33 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/skills" element={<SkillsPage />} />
-      <Route path="/skills/:slug" element={<SkillDetailPage />} />
-      <Route path="/showcases" element={<ShowcasesPage />} />
-      <Route path="/categories" element={<CategoriesPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/dashboard/skills" element={<MemberSkillsPage />} />
-      <Route path="/dashboard/skills/new" element={<MemberSkillFormPage />} />
-      <Route path="/dashboard/skills/:id/edit" element={<MemberSkillFormPage />} />
-      <Route path="/dashboard/requests" element={<MemberRequestsPage />} />
-      <Route path="/dashboard/favorites" element={<MemberSkillsPage />} />
-      <Route path="/admin" element={<AdminDashboardPage />} />
-      <Route path="/admin/skills" element={<AdminSkillsPage />} />
-      <Route path="/admin/skills/new" element={<MemberSkillFormPage />} />
-      <Route path="/admin/skills/:id/edit" element={<MemberSkillFormPage />} />
-      <Route path="/admin/requests" element={<AdminRequestsPage />} />
-      <Route path="/admin/categories" element={<AdminCategoriesPage />} />
-      <Route path="/admin/audit-log" element={<AdminAuditLogPage />} />
-      <Route path="/admin/settings" element={<AdminSettingsPage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/skills" element={<SkillsPage />} />
+        <Route path="/skills/:slug" element={<SkillDetailPage />} />
+        <Route path="/showcases" element={<ShowcasesPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard/skills" element={<MemberSkillsPage />} />
+        <Route path="/dashboard/skills/new" element={<MemberSkillFormPage />} />
+        <Route path="/dashboard/skills/:id/edit" element={<MemberSkillFormPage />} />
+        <Route path="/dashboard/requests" element={<MemberRequestsPage />} />
+        <Route path="/dashboard/favorites" element={<MemberSkillsPage />} />
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/skills" element={<AdminSkillsPage />} />
+        <Route path="/admin/skills/new" element={<MemberSkillFormPage />} />
+        <Route path="/admin/skills/:id/edit" element={<MemberSkillFormPage />} />
+        <Route path="/admin/requests" element={<AdminRequestsPage />} />
+        <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+        <Route path="/admin/audit-log" element={<AdminAuditLogPage />} />
+        <Route path="/admin/settings" element={<AdminSettingsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <SkillAIAssistant />
+    </>
   );
 }
 

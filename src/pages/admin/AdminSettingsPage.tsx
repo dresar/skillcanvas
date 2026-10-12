@@ -1,29 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { getSettings, saveSettings, resetDemoData, addAuditLog } from '../../lib/storage';
 
 interface Settings {
   workingName: string;
-  defaultTheme: string;
+  defaultTheme: 'light' | 'dark';
 }
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({ workingName: '', defaultTheme: 'light' });
 
   useEffect(() => {
-    const stored = getSettings() as Settings;
+    const stored = getSettings() as Settings | null;
     if (stored) {
       setSettings(stored);
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
     saveSettings(settings);
-    addAuditLog({ action: 'update-settings', targetId: 'settings', details: `Updated settings` });
+    addAuditLog({ action: 'update-settings', targetId: 'settings', details: 'Updated settings' });
   };
 
   const handleReset = () => {
