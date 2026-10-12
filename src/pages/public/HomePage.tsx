@@ -1,13 +1,11 @@
 import { FormEvent, useMemo, useState } from 'react';
-import { ArrowRight, Bookmark, Search, Sparkles, Star } from 'lucide-react';
+import { ArrowRight, Search, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ShellHeader from '../../components/ShellHeader';
+import SkillCard from '../../components/skills/SkillCard';
 import { getCategories, getFavorites, getSkills, toggleFavorite } from '../../lib/storage';
 
 type RecordItem = Record<string, any>;
-
-const metric = (skill: RecordItem, name: string) => skill.metrics?.[name] ?? skill[name] ?? 0;
-const isVerified = (skill: RecordItem) => Boolean(skill.verified) || skill.verificationState === 'source_inspected' || skill.verificationState === 'preview_checked';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -17,7 +15,7 @@ export default function HomePage() {
   const [favorites, setFavorites] = useState(() => new Set(getFavorites()));
 
   const featuredSkills = useMemo(
-    () => skills.filter((skill) => skill.isFeatured || skill.status === 'published').slice(0, 6),
+    () => skills.filter((skill) => skill.isFeatured || skill.status === 'published').slice(0, 8),
     [skills],
   );
 
@@ -88,12 +86,9 @@ export default function HomePage() {
 
         <section className="mx-auto max-w-7xl px-5 pb-20 lg:px-8">
           <div className="flex items-end justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Editor&apos;s selection</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">A short list worth opening</h2></div><Link to="/skills" className="flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-neutral-950 dark:hover:text-white">View all <ArrowRight className="h-4 w-4" /></Link></div>
-          {featuredSkills.length === 0 ? <p className="py-12 text-sm text-neutral-500">The index is waiting for its first published skill.</p> : <div className="mt-6 grid gap-px overflow-hidden border border-neutral-200 bg-neutral-200 sm:grid-cols-2 lg:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
-            {featuredSkills.map((skill, index) => (
-              <article key={skill.id} className="group flex min-h-64 flex-col justify-between bg-neutral-50 p-6 dark:bg-neutral-950">
-                <div><div className="flex items-center justify-between text-xs text-neutral-500"><span>0{index + 1} / {isVerified(skill) ? 'Verified' : 'Listed'}</span><button onClick={() => handleFavorite(skill.id)} aria-label={`${favorites.has(skill.id) ? 'Remove' : 'Save'} ${skill.name}`} className="transition hover:text-neutral-950 dark:hover:text-white"><Bookmark className="h-4 w-4" fill={favorites.has(skill.id) ? 'currentColor' : 'none'} /></button></div><h3 className="mt-8 text-xl font-semibold tracking-tight"><Link to={`/skills/${skill.slug}`} className="hover:underline">{skill.name}</Link></h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">{skill.summary || skill.description}</p></div>
-                <div className="mt-8 flex items-center justify-between border-t border-neutral-200 pt-4 text-xs text-neutral-500 dark:border-neutral-800"><span>{skill.category || 'Uncategorised'}</span><span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" />{metric(skill, 'stars')}</span></div>
-              </article>
+          {featuredSkills.length === 0 ? <p className="py-12 text-sm text-neutral-500">The index is waiting for its first published skill.</p> : <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {featuredSkills.map((skill) => (
+              <SkillCard key={skill.id} skill={skill} onFavoriteToggle={handleFavorite} />
             ))}
           </div>}
         </section>
