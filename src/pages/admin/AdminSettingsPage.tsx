@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
+import BackButton from '../../components/BackButton';
 import ShellHeader from '../../components/ShellHeader';
 import { addAuditLog, getSettings, resetDemoData, saveSettings } from '../../lib/storage';
 
@@ -55,6 +56,7 @@ export default function AdminSettingsPage() {
     <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50">
       <ShellHeader />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-4"><BackButton /></div>
         <header className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
             Administration

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Grid, List, Trash2 } from 'lucide-react';
+import BackButton from '../../components/BackButton';
 import ShellHeader from '../../components/ShellHeader';
 import { addAuditLog, getSkills, saveSkill } from '../../lib/storage';
 
@@ -15,13 +16,7 @@ interface Skill {
 
 function PreviewPattern() {
   return (
-    <svg
-      viewBox="0 0 400 240"
-      preserveAspectRatio="none"
-      className="h-full w-full"
-      role="img"
-      aria-label="Skill preview"
-    >
+    <svg viewBox="0 0 400 240" preserveAspectRatio="none" className="h-full w-full" role="img" aria-label="Skill preview">
       <defs>
         <linearGradient id="skill-preview-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#d4d4d4" />
@@ -46,8 +41,7 @@ export default function AdminSkillsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    const allSkills = getSkills() as Skill[];
-    setSkills(allSkills);
+    setSkills(getSkills() as Skill[]);
   }, []);
 
   const togglePublished = (id: string) => {
@@ -86,55 +80,25 @@ export default function AdminSkillsPage() {
     <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50">
       <ShellHeader />
       <main className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+        <div className="mb-4"><BackButton /></div>
         <section className="mb-10 flex flex-col gap-6 border-b border-neutral-200 pb-8 dark:border-neutral-800 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="mb-3 text-[10px] font-semibold tracking-[0.2em] text-neutral-500">
-              ADMIN STUDIO / REPOSITORY
-            </p>
+            <p className="mb-3 text-[10px] font-semibold tracking-[0.2em] text-neutral-500">ADMIN STUDIO / REPOSITORY</p>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Manage Skills</h1>
-            <p className="mt-3 max-w-2xl text-sm text-neutral-500 dark:text-neutral-400">
-              Curate, publish, inspect, and maintain agent skills across the index.
-            </p>
+            <p className="mt-3 max-w-2xl text-sm text-neutral-500 dark:text-neutral-400">Curate, publish, inspect, and maintain agent skills across the index.</p>
           </div>
-
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center rounded-[6px] border border-neutral-300 p-1 dark:border-neutral-700">
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                className={`inline-flex items-center gap-2 rounded-[4px] px-3 py-2 text-xs font-medium transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950'
-                    : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 dark:hover:bg-neutral-900 dark:hover:text-neutral-50'
-                }`}
-                aria-label="Grid view"
-                aria-pressed={viewMode === 'grid'}
-              >
+              <button type="button" onClick={() => setViewMode('grid')} className={`inline-flex items-center gap-2 rounded-[4px] px-3 py-2 text-xs font-medium transition-colors ${viewMode === 'grid' ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950' : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 dark:hover:bg-neutral-900 dark:hover:text-neutral-50'}`} aria-label="Grid view" aria-pressed={viewMode === 'grid'}>
                 <Grid className="h-3.5 w-3.5" />
                 Grid
               </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('table')}
-                className={`inline-flex items-center gap-2 rounded-[4px] px-3 py-2 text-xs font-medium transition-colors ${
-                  viewMode === 'table'
-                    ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950'
-                    : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 dark:hover:bg-neutral-900 dark:hover:text-neutral-50'
-                }`}
-                aria-label="Table view"
-                aria-pressed={viewMode === 'table'}
-              >
+              <button type="button" onClick={() => setViewMode('table')} className={`inline-flex items-center gap-2 rounded-[4px] px-3 py-2 text-xs font-medium transition-colors ${viewMode === 'table' ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950' : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 dark:hover:bg-neutral-900 dark:hover:text-neutral-50'}`} aria-label="Table view" aria-pressed={viewMode === 'table'}>
                 <List className="h-3.5 w-3.5" />
                 Table
               </button>
             </div>
-
-            <Link
-              to="/admin/skills/new"
-              className="inline-flex items-center gap-2 rounded-[6px] bg-neutral-950 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-            >
-              + New Skill
-            </Link>
+            <Link to="/admin/skills/new" className="inline-flex items-center gap-2 rounded-[6px] bg-neutral-950 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200">+ New Skill</Link>
           </div>
         </section>
 
@@ -145,60 +109,26 @@ export default function AdminSkillsPage() {
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {skills.map(skill => (
-              <article
-                key={skill.id}
-                className="overflow-hidden border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-              >
+              <article key={skill.id} className="overflow-hidden border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
                 <div className="aspect-[1.65] w-full overflow-hidden border-b border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900">
-                  {skill.imageUrl ? (
-                    <img src={skill.imageUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <PreviewPattern />
-                  )}
+                  {skill.imageUrl ? <img src={skill.imageUrl} alt="" className="h-full w-full object-cover" /> : <PreviewPattern />}
                 </div>
-
                 <div className="p-4">
-                  <p className="mb-2 truncate text-[10px] uppercase tracking-wider text-neutral-500">
-                    {skill.category || 'Agent Skill'}
-                  </p>
+                  <p className="mb-2 truncate text-[10px] uppercase tracking-wider text-neutral-500">{skill.category || 'Agent Skill'}</p>
                   <h2 className="truncate text-sm font-semibold">{skill.name}</h2>
                   <div className="mt-3">
-                    <span
-                      className={`inline-flex border px-2 py-0.5 font-mono text-[9px] uppercase ${
-                        skill.published
-                          ? 'border-green-300 text-green-700 dark:border-green-800 dark:text-green-400'
-                          : 'border-yellow-300 text-yellow-700 dark:border-yellow-800 dark:text-yellow-400'
-                      }`}
-                    >
+                    <span className={`inline-flex border px-2 py-0.5 font-mono text-[9px] uppercase ${skill.published ? 'border-green-300 text-green-700 dark:border-green-800 dark:text-green-400' : 'border-yellow-300 text-yellow-700 dark:border-yellow-800 dark:text-yellow-400'}`}>
                       {skill.published ? 'Published' : 'Draft'}
                     </span>
                   </div>
                 </div>
-
                 <div className="flex items-center justify-between border-t border-neutral-200 px-4 py-2.5 text-xs dark:border-neutral-800">
-                  <Link
-                    to={`/admin/skills/${skill.id}/edit`}
-                    className="font-medium text-neutral-600 transition-colors hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-50"
-                  >
-                    Edit
-                  </Link>
+                  <Link to={`/admin/skills/${skill.id}/edit`} className="font-medium text-neutral-600 transition-colors hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-50">Edit</Link>
                   <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => togglePublished(skill.id)}
-                      className="text-neutral-500 transition-colors hover:text-neutral-950 dark:hover:text-neutral-50"
-                      title={skill.published ? 'Unlist' : 'Publish'}
-                      aria-label={skill.published ? `Unlist ${skill.name}` : `Publish ${skill.name}`}
-                    >
+                    <button type="button" onClick={() => togglePublished(skill.id)} className="text-neutral-500 transition-colors hover:text-neutral-950 dark:hover:text-neutral-50" title={skill.published ? 'Unlist' : 'Publish'} aria-label={skill.published ? `Unlist ${skill.name}` : `Publish ${skill.name}`}>
                       {skill.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteId(skill.id)}
-                      className="text-neutral-500 transition-colors hover:text-red-600 dark:hover:text-red-400"
-                      title="Delete"
-                      aria-label={`Delete ${skill.name}`}
-                    >
+                    <button type="button" onClick={() => setDeleteId(skill.id)} className="text-neutral-500 transition-colors hover:text-red-600 dark:hover:text-red-400" title="Delete" aria-label={`Delete ${skill.name}`}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -221,44 +151,19 @@ export default function AdminSkillsPage() {
                 {skills.map(skill => (
                   <tr key={skill.id} className="border-b border-neutral-200 last:border-0 dark:border-neutral-800">
                     <td className="px-5 py-4 text-sm font-medium">{skill.name}</td>
-                    <td className="px-5 py-4 text-xs uppercase tracking-wider text-neutral-500">
-                      {skill.category || 'Agent Skill'}
-                    </td>
+                    <td className="px-5 py-4 text-xs uppercase tracking-wider text-neutral-500">{skill.category || 'Agent Skill'}</td>
                     <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex border px-2 py-0.5 font-mono text-[9px] uppercase ${
-                          skill.published
-                            ? 'border-green-300 text-green-700 dark:border-green-800 dark:text-green-400'
-                            : 'border-yellow-300 text-yellow-700 dark:border-yellow-800 dark:text-yellow-400'
-                        }`}
-                      >
+                      <span className={`inline-flex border px-2 py-0.5 font-mono text-[9px] uppercase ${skill.published ? 'border-green-300 text-green-700 dark:border-green-800 dark:text-green-400' : 'border-yellow-300 text-yellow-700 dark:border-yellow-800 dark:text-yellow-400'}`}>
                         {skill.published ? 'Published' : 'Draft'}
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex justify-end items-center gap-4">
-                        <Link
-                          to={`/admin/skills/${skill.id}/edit`}
-                          className="text-xs font-medium text-neutral-600 transition-colors hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-50"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => togglePublished(skill.id)}
-                          className="text-neutral-500 transition-colors hover:text-neutral-950 dark:hover:text-neutral-50"
-                          title={skill.published ? 'Unlist' : 'Publish'}
-                          aria-label={skill.published ? `Unlist ${skill.name}` : `Publish ${skill.name}`}
-                        >
+                      <div className="flex items-center justify-end gap-4">
+                        <Link to={`/admin/skills/${skill.id}/edit`} className="text-xs font-medium text-neutral-600 transition-colors hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-50">Edit</Link>
+                        <button type="button" onClick={() => togglePublished(skill.id)} className="text-neutral-500 transition-colors hover:text-neutral-950 dark:hover:text-neutral-50" title={skill.published ? 'Unlist' : 'Publish'} aria-label={skill.published ? `Unlist ${skill.name}` : `Publish ${skill.name}`}>
                           {skill.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteId(skill.id)}
-                          className="text-neutral-500 transition-colors hover:text-red-600 dark:hover:text-red-400"
-                          title="Delete"
-                          aria-label={`Delete ${skill.name}`}
-                        >
+                        <button type="button" onClick={() => setDeleteId(skill.id)} className="text-neutral-500 transition-colors hover:text-red-600 dark:hover:text-red-400" title="Delete" aria-label={`Delete ${skill.name}`}>
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -271,34 +176,13 @@ export default function AdminSkillsPage() {
         )}
 
         {deleteId && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/60 px-5"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-dialog-title"
-          >
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/60 px-5" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
             <div className="w-full max-w-md border border-neutral-200 bg-white p-6 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-              <h2 id="delete-dialog-title" className="text-lg font-semibold">
-                Delete skill?
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-neutral-500 dark:text-neutral-400">
-                This action permanently removes the skill from the repository and cannot be undone.
-              </p>
+              <h2 id="delete-dialog-title" className="text-lg font-semibold">Delete skill?</h2>
+              <p className="mt-3 text-sm leading-6 text-neutral-500 dark:text-neutral-400">This action permanently removes the skill from the repository and cannot be undone.</p>
               <div className="mt-7 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDeleteId(null)}
-                  className="rounded-[6px] border border-neutral-300 px-4 py-2 text-xs font-semibold transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmDelete}
-                  className="rounded-[6px] bg-neutral-950 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-                >
-                  Delete
-                </button>
+                <button type="button" onClick={() => setDeleteId(null)} className="rounded-[6px] border border-neutral-300 px-4 py-2 text-xs font-semibold transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">Cancel</button>
+                <button type="button" onClick={confirmDelete} className="rounded-[6px] bg-neutral-950 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200">Delete</button>
               </div>
             </div>
           </div>
