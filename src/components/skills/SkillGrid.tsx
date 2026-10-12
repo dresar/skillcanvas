@@ -1,61 +1,33 @@
 import React from 'react';
-import { SkillCard, Skill } from './SkillCard';
+import SkillCard, { normalizeSkill, SkillInput } from './SkillCard';
 
 export interface SkillGridProps {
-  skills: Skill[];
+  skills: SkillInput[];
   viewMode?: 'grid' | 'table';
   onFavoriteToggle?: (id: string) => void;
 }
 
-const SkillGrid: React.FC<SkillGridProps> = ({ skills, viewMode = 'grid', onFavoriteToggle }) => {
+const stat = (value: number) => value > 999 ? `${(value / 1000).toFixed(value > 9999 ? 0 : 1)}k` : String(value);
+
+export function SkillGrid({ skills, viewMode = 'grid', onFavoriteToggle }: SkillGridProps) {
+  const normalized = skills.map(normalizeSkill);
   if (viewMode === 'table') {
     return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-          <thead className="bg-neutral-50 dark:bg-neutral-800">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Thumbnail</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Name</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Type</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Category</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Stars/Downloads</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Install Command</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Actions</th>
+      <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+        <table className="min-w-full divide-y divide-neutral-200 text-left dark:divide-neutral-800">
+          <thead className="bg-neutral-50 dark:bg-neutral-900">
+            <tr className="font-mono text-[10px] uppercase tracking-[0.14em] text-neutral-500">
+              <th className="px-4 py-3 font-normal">Skill</th><th className="px-4 py-3 font-normal">Category</th><th className="px-4 py-3 font-normal">Status</th><th className="px-4 py-3 font-normal">Signals</th><th className="px-4 py-3 font-normal">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-neutral-900 divide-y divide-neutral-200 dark:divide-neutral-700">
-            {skills.map((skill) => (
-              <tr key={skill.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="w-10 h-10 rounded overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                    {skill.imageUrl ? (
-                      <img src={skill.imageUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex items-center justify-center w-full h-full text-neutral-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-neutral-900 dark:text-white">{skill.title}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">-</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">{skill.category}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">-</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400 font-mono">{skill.installCommand}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  <button
-                    onClick={() => onFavoriteToggle?.(skill.id)}
-                    className={`p-1 rounded ${
-                      skill.isFavorited ? 'text-red-500' : 'text-neutral-400 hover:text-red-400'
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill={skill.isFavorited ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </button>
-                </td>
+          <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-800 dark:bg-neutral-950">
+            {normalized.map((skill) => (
+              <tr key={skill.id} className="text-sm transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900">
+                <td className="max-w-xs px-4 py-3"><a href={`/skills/${skill.slug}`} className="block truncate font-medium text-neutral-950 hover:underline dark:text-neutral-50">{skill.name}</a><span className="mt-1 block truncate text-xs text-neutral-500">{skill.summary}</span></td>
+                <td className="whitespace-nowrap px-4 py-3 text-xs text-neutral-600 dark:text-neutral-400">{skill.category}</td>
+                <td className="whitespace-nowrap px-4 py-3"><span className="border border-neutral-300 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] dark:border-neutral-700">{skill.verificationStatus}</span></td>
+                <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-neutral-500">{stat(skill.stars)} stars · {stat(skill.downloads)} uses</td>
+                <td className="whitespace-nowrap px-4 py-3"><button type="button" onClick={() => onFavoriteToggle?.(skill.id)} className="font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-500 hover:text-neutral-950 dark:hover:text-white">{skill.isFavorited ? 'Saved' : 'Save'}</button></td>
               </tr>
             ))}
           </tbody>
@@ -64,13 +36,7 @@ const SkillGrid: React.FC<SkillGridProps> = ({ skills, viewMode = 'grid', onFavo
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {skills.map((skill) => (
-        <SkillCard key={skill.id} skill={skill} onFavoriteToggle={onFavoriteToggle} />
-      ))}
-    </div>
-  );
-};
+  return <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">{normalized.map((skill) => <SkillCard key={skill.id} skill={skill} onFavoriteToggle={onFavoriteToggle} />)}</div>;
+}
 
-export { SkillGrid };
+export default SkillGrid;

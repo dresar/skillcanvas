@@ -1,105 +1,22 @@
-import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const Header: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      return 'dark';
-    }
-    return 'light';
-  });
+const navLinks = [{ label: 'Skills', to: '/skills' }, { label: 'Showcases', to: '/showcases' }, { label: 'Categories', to: '/categories' }, { label: 'About', to: '/about' }];
 
-  const [role, setRole] = useState<'visitor' | 'member' | 'admin'>(() => {
-    const stored = localStorage.getItem('currentRole');
-    if (stored === 'member' || stored === 'admin') return stored;
-    return 'visitor';
-  });
-
+export function Header() {
   const location = useLocation();
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [role, setRole] = useState<'visitor' | 'member' | 'admin'>(() => {
+    const value = localStorage.getItem('currentRole');
+    return value === 'member' || value === 'admin' ? value : 'visitor';
+  });
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  useEffect(() => { document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light'); }, [dark]);
+  useEffect(() => { localStorage.setItem('currentRole', role); }, [role]);
+  const action = role === 'visitor' ? { label: 'Sign in', to: '/login' } : role === 'member' ? { label: 'Workspace', to: '/dashboard' } : { label: 'Admin', to: '/admin' };
 
-  useEffect(() => {
-    localStorage.setItem('currentRole', role);
-  }, [role]);
+  return <header className="flex min-h-16 flex-wrap items-center gap-4 border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950 md:px-6"><Link to="/" className="flex items-center gap-2 text-sm font-semibold text-neutral-950 dark:text-neutral-50"><span className="flex h-7 w-7 items-center justify-center border border-neutral-950 font-mono text-xs dark:border-neutral-50">S</span>SkillCanvas</Link><span className="border border-neutral-300 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-neutral-500 dark:border-neutral-700">v0.1</span><nav className="hidden items-center gap-5 md:flex">{navLinks.map((link) => <Link key={link.to} to={link.to} className={`font-mono text-[10px] uppercase tracking-[0.13em] transition-colors ${location.pathname.startsWith(link.to) ? 'text-neutral-950 dark:text-white' : 'text-neutral-500 hover:text-neutral-950 dark:hover:text-white'}`}>{link.label}</Link>)}</nav><div className="ml-auto flex items-center gap-2"><button type="button" onClick={() => setDark((value) => !value)} className="p-2 text-neutral-500 hover:text-neutral-950 dark:hover:text-white" aria-label="Toggle theme">{dark ? <Sun size={16} /> : <Moon size={16} />}</button><select value={role} onChange={(event) => setRole(event.target.value as typeof role)} className="border border-neutral-300 bg-white px-2 py-2 font-mono text-[9px] uppercase tracking-[0.1em] text-neutral-700 outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-300"><option value="visitor">Visitor</option><option value="member">Member</option><option value="admin">Admin</option></select><Link to={action.to} className="hidden border border-neutral-950 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-950 hover:bg-neutral-950 hover:text-white dark:border-neutral-50 dark:text-neutral-50 dark:hover:bg-neutral-50 dark:hover:text-neutral-950 sm:block">{action.label}</Link></div></header>;
+}
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
-
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRole(e.target.value as 'visitor' | 'member' | 'admin');
-  };
-
-  const actionLink = () => {
-    if (role === 'visitor') return { label: 'Sign In', to: '/login' };
-    if (role === 'member') return { label: 'My Workspace', to: '/dashboard' };
-    return { label: 'Admin Portal', to: '/admin' };
-  };
-
-  const navLinks = [
-    { label: 'Skills', to: '/skills' },
-    { label: 'Showcases', to: '/showcases' },
-    { label: 'Categories', to: '/categories' },
-    { label: 'About', to: '/about' },
-  ];
-
-  return (
-    <header className="h-14 md:h-16 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex items-center px-4 md:px-6">
-      <div className="flex items-center space-x-4">
-        <Link to="/" className="text-lg font-bold text-neutral-900 dark:text-white">
-          SkillCanvas
-        </Link>
-        <span className="text-xs text-neutral-500 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-600 rounded px-1.5 py-0.5">
-          v0.1
-        </span>
-        <nav className="hidden md:flex space-x-4 ml-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`text-sm font-medium ${
-                location.pathname.startsWith(link.to)
-                  ? 'text-neutral-900 dark:text-white'
-                  : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
-      <div className="flex items-center space-x-4 ml-auto">
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-400"
-          aria-label="Toggle theme"
-        >
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
-        <select
-          value={role}
-          onChange={handleRoleChange}
-          className="text-sm border border-neutral-300 dark:border-neutral-600 rounded-md px-2 py-1 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400"
-        >
-          <option value="visitor">Visitor</option>
-          <option value="member">Member</option>
-          <option value="admin">Admin</option>
-        </select>
-        <Link
-          to={actionLink().to}
-          className="text-sm font-medium text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-700 px-3 py-1.5 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600"
-        >
-          {actionLink().label}
-        </Link>
-      </div>
-    </header>
-  );
-};
-
-export { Header };
+export default Header;
