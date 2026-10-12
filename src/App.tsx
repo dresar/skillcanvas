@@ -7,6 +7,7 @@ import SkillDetailPage from './pages/public/SkillDetailPage';
 import ShowcasesPage from './pages/public/ShowcasesPage';
 import CategoriesPage from './pages/public/CategoriesPage';
 import AboutPage from './pages/public/AboutPage';
+import LoginPage from './pages/public/LoginPage';
 import DashboardPage from './pages/member/DashboardPage';
 import MemberSkillsPage from './pages/member/MemberSkillsPage';
 import MemberSkillFormPage from './pages/member/MemberSkillFormPage';
@@ -37,7 +38,7 @@ function App() {
         <Route path="/showcases" element={<ShowcasesPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/login" element={<div>Login Page (placeholder)</div>} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/dashboard/skills" element={<MemberSkillsPage />} />
         <Route path="/dashboard/skills/new" element={<MemberSkillFormPage />} />
