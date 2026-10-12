@@ -1,34 +1,13 @@
+import { ArrowRight, Check, Eye, GitBranch, Layers3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ShellHeader from '../../components/ShellHeader';
 
+const principles = [
+  { icon: Eye, title: 'Readable by default', text: 'Dense enough for comparison, calm enough to scan. The interface stays out of the way of the work.' },
+  { icon: GitBranch, title: 'Source in the open', text: 'Repository, license, version, and update signals sit beside the description—not behind a pitch.' },
+  { icon: Layers3, title: 'Context over claims', text: 'Skills are grouped by discipline and shown with practical limitations, supported agents, and installation details.' },
+];
+
 export default function AboutPage() {
-  return (
-    <div className="min-h-screen bg-white">
-      <ShellHeader />
-      <main className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">About SkillCanvas</h1>
-        <div className="prose prose-gray max-w-none">
-          <p>
-            SkillCanvas is an open-source directory for discovering high-quality AI agent skills. 
-            Our mission is to provide developers with a curated, editorially vetted collection of 
-            tools that actually work — no fluff, no generic AI clichés.
-          </p>
-          <h2 className="text-xl font-semibold mt-8">Anti-Slop Editorial Standard</h2>
-          <p>
-            We adhere to a strict editorial standard we call "Anti-Slop": monochrome design, 
-            high-density information, and zero generic AI buzzwords. Every skill listed here 
-            has been reviewed for real utility and clear documentation.
-          </p>
-          <h2 className="text-xl font-semibold mt-8">Developer-First Transparency</h2>
-          <p>
-            Each skill page includes source repository, license, metrics, and supported agents. 
-            We believe in full transparency so you can make informed decisions before integrating 
-            any skill into your workflow.
-          </p>
-          <p className="mt-6">
-            SkillCanvas is community-driven and open source. Contributions are welcome.
-          </p>
-        </div>
-      </main>
-    </div>
-  );
+  return <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50"><ShellHeader /><main className="mx-auto max-w-7xl px-5 py-12 lg:px-8"><section className="grid gap-12 border-b border-neutral-200 pb-16 lg:grid-cols-[1.25fr_.75fr] lg:pb-24 dark:border-neutral-800"><div><p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">About the directory</p><h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-[-0.06em] sm:text-7xl">A better way to choose a skill.</h1></div><p className="max-w-md self-end text-lg leading-8 text-neutral-600 dark:text-neutral-400">SkillCanvas is an open directory for people building with AI agents. We care about useful tools, clear provenance, and interfaces that do not add noise to the decision.</p></section><section className="grid gap-px border-b border-neutral-200 bg-neutral-200 py-px sm:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">{principles.map(({ icon: Icon, title, text }) => <article key={title} className="bg-neutral-50 p-6 dark:bg-neutral-950"><Icon className="h-5 w-5 text-neutral-500" /><h2 className="mt-12 font-semibold tracking-tight">{title}</h2><p className="mt-3 text-sm leading-6 text-neutral-500">{text}</p></article>)}</section><section className="grid gap-10 py-16 lg:grid-cols-[.8fr_1.2fr]"><div><p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">The editorial standard</p><h2 className="mt-3 text-3xl font-semibold tracking-tight">Anti-slop by design.</h2></div><div className="max-w-2xl space-y-6 text-sm leading-7 text-neutral-600 dark:text-neutral-400"><p>We avoid generic AI language, inflated promises, and galleries that hide the details. Each public entry should help you understand what it does, where it comes from, and whether it fits your workflow.</p><p>The visual system is intentionally monochrome: hierarchy comes from type, spacing, borders, and evidence. Dark mode is available without changing the character of the index.</p><ul className="space-y-3 border-t border-neutral-200 pt-6 dark:border-neutral-800"><li className="flex gap-3"><Check className="mt-1 h-4 w-4 shrink-0" />Practical descriptions over marketing copy</li><li className="flex gap-3"><Check className="mt-1 h-4 w-4 shrink-0" />Visible source and compatibility context</li><li className="flex gap-3"><Check className="mt-1 h-4 w-4 shrink-0" />A community-led, open-source catalogue</li></ul></div></section><section className="border-t border-neutral-200 py-10 dark:border-neutral-800"><Link to="/skills" className="inline-flex items-center gap-2 text-sm font-semibold hover:underline">Browse the index <ArrowRight className="h-4 w-4" /></Link></section></main></div>;
 }

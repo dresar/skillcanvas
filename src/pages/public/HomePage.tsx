@@ -1,117 +1,104 @@
-import { useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
+import { ArrowRight, Bookmark, Search, Sparkles, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ShellHeader from '../../components/ShellHeader';
-import SkillGrid from '../../components/SkillGrid';
+import { getCategories, getFavorites, getSkills, toggleFavorite } from '../../lib/storage';
 
-const categories = [
-  { id: 'ui-design', label: 'UI & Design' },
-  { id: 'agentic-coding', label: 'Agentic Coding' },
-  { id: 'testing', label: 'Testing' },
-  { id: 'security', label: 'Security' },
-  { id: 'automation', label: 'Automation' },
-  { id: 'research', label: 'Research' },
-];
+type RecordItem = Record<string, any>;
 
-const featuredSkills = [
-  { id: '1', name: 'Design Assistant', description: 'Generates UI components from prompts.', stars: 142, forks: 23, downloads: 890, category: 'UI & Design', verified: true, version: '1.2.0' },
-  { id: '2', name: 'Code Reviewer', description: 'Automated code review for pull requests.', stars: 98, forks: 12, downloads: 450, category: 'Agentic Coding', verified: true, version: '2.0.1' },
-  { id: '3', name: 'Test Generator', description: 'Creates unit tests from code.', stars: 76, forks: 8, downloads: 320, category: 'Testing', verified: false, version: '0.9.0' },
-  { id: '4', name: 'Vuln Scanner', description: 'Scans dependencies for vulnerabilities.', stars: 210, forks: 45, downloads: 1200, category: 'Security', verified: true, version: '3.1.0' },
-  { id: '5', name: 'Deploy Bot', description: 'Automates deployment pipelines.', stars: 55, forks: 5, downloads: 180, category: 'Automation', verified: false, version: '1.0.0' },
-  { id: '6', name: 'Research Summarizer', description: 'Summarizes academic papers.', stars: 34, forks: 3, downloads: 95, category: 'Research', verified: false, version: '0.5.0' },
-  { id: '7', name: 'Icon Generator', description: 'Generates SVG icons from descriptions.', stars: 88, forks: 14, downloads: 410, category: 'UI & Design', verified: true, version: '1.3.0' },
-  { id: '8', name: 'Refactor Agent', description: 'Suggests code refactoring improvements.', stars: 120, forks: 20, downloads: 600, category: 'Agentic Coding', verified: true, version: '2.1.0' },
-];
+const metric = (skill: RecordItem, name: string) => skill.metrics?.[name] ?? skill[name] ?? 0;
+const isVerified = (skill: RecordItem) => Boolean(skill.verified) || skill.verificationState === 'source_inspected' || skill.verificationState === 'preview_checked';
 
 export default function HomePage() {
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const skills = getSkills() as RecordItem[];
+  const categories = getCategories() as RecordItem[];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState(() => new Set(getFavorites()));
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/skills?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
+  const featuredSkills = useMemo(
+    () => skills.filter((skill) => skill.isFeatured || skill.status === 'published').slice(0, 6),
+    [skills],
+  );
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (query) navigate(`/skills?search=${encodeURIComponent(query)}`);
+  };
+
+  const handleFavorite = (id: string) => {
+    toggleFavorite(id);
+    setFavorites(new Set(getFavorites()));
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50">
       <ShellHeader />
       <main>
-        <section className="py-16 px-4 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Curated AI Agent Skills Directory
-          </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-            Discover high-quality, editorially vetted AI agent skills. No fluff, no AI clichés — just tools that work.
-          </p>
-          <form onSubmit={handleSearch} className="mt-8 max-w-xl mx-auto flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search skills..."
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Search
-            </button>
-          </form>
+        <section className="border-b border-neutral-200 dark:border-neutral-800">
+          <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 lg:grid-cols-[1.15fr_.85fr] lg:items-end lg:px-8 lg:py-28">
+            <div>
+              <p className="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500 dark:text-neutral-400">
+                <Sparkles className="h-4 w-4" /> The skill index
+              </p>
+              <h1 className="max-w-4xl text-5xl font-semibold tracking-[-0.06em] sm:text-7xl">Useful skills, clearly catalogued.</h1>
+              <p className="mt-7 max-w-2xl text-lg leading-8 text-neutral-600 dark:text-neutral-400">
+                A considered directory of AI agent skills with source context, installation details, and the signals that help you choose what belongs in your stack.
+              </p>
+              <form onSubmit={handleSearch} className="mt-10 flex max-w-2xl flex-col gap-3 sm:flex-row">
+                <label className="flex min-h-12 flex-1 items-center gap-3 border border-neutral-300 bg-white px-4 dark:border-neutral-700 dark:bg-neutral-900">
+                  <Search className="h-4 w-4 text-neutral-400" />
+                  <span className="sr-only">Search skills</span>
+                  <input
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search by name, use case, or tag"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
+                  />
+                </label>
+                <button type="submit" className="min-h-12 bg-neutral-950 px-7 text-sm font-semibold text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200">
+                  Search index
+                </button>
+              </form>
+            </div>
+            <div className="border-l border-neutral-300 pl-6 dark:border-neutral-700 lg:justify-self-end">
+              <p className="max-w-xs text-sm leading-6 text-neutral-500 dark:text-neutral-400">No hype layer. Every entry is presented with enough detail to make a practical decision.</p>
+              <div className="mt-10 grid max-w-xs grid-cols-2 gap-x-8 gap-y-6 border-t border-neutral-200 pt-6 dark:border-neutral-800">
+                <div><p className="text-3xl font-semibold tracking-tight">{skills.length}</p><p className="mt-1 text-xs uppercase tracking-wider text-neutral-500">Listed skills</p></div>
+                <div><p className="text-3xl font-semibold tracking-tight">{categories.length}</p><p className="mt-1 text-xs uppercase tracking-wider text-neutral-500">Disciplines</p></div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <section className="px-4 pb-8">
-          <div className="max-w-7xl mx-auto flex flex-wrap gap-2 justify-center">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/skills?category=${cat.id}`}
-                className="rounded-full border border-gray-300 px-4 py-1 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                {cat.label}
+        <section className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+          <div className="flex items-end justify-between gap-4 border-b border-neutral-200 pb-4 dark:border-neutral-800">
+            <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Browse the index</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">Start with a discipline</h2></div>
+            <Link to="/categories" className="hidden items-center gap-2 text-sm font-medium text-neutral-500 hover:text-neutral-950 dark:hover:text-white sm:flex">All categories <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {categories.slice(0, 8).map((category) => (
+              <Link key={category.id} to={`/skills?category=${category.slug}`} className="border border-neutral-300 bg-white px-4 py-2 text-sm transition hover:border-neutral-950 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-white">
+                {category.name}
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="px-4 pb-12">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Featured Skills</h2>
-            <SkillGrid skills={featuredSkills} viewMode="grid" />
-          </div>
-        </section>
-
-        <section className="px-4 pb-12">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Showcase Spotlight</h2>
-            <div className="border border-gray-200 rounded-lg p-6 flex flex-col md:flex-row gap-6 items-center">
-              <div className="w-full md:w-1/2 aspect-video bg-gray-100 rounded flex items-center justify-center text-gray-400">
-                Preview
-              </div>
-              <div className="w-full md:w-1/2">
-                <h3 className="text-xl font-semibold text-gray-900">Design Assistant Showcase</h3>
-                <p className="mt-2 text-gray-600">See how Design Assistant generates complete UI components from natural language prompts.</p>
-                <Link
-                  to="/showcases"
-                  className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  View Showcase
-                </Link>
-              </div>
-            </div>
-          </div>
+        <section className="mx-auto max-w-7xl px-5 pb-20 lg:px-8">
+          <div className="flex items-end justify-between border-b border-neutral-200 pb-4 dark:border-neutral-800"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Editor&apos;s selection</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">A short list worth opening</h2></div><Link to="/skills" className="flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-neutral-950 dark:hover:text-white">View all <ArrowRight className="h-4 w-4" /></Link></div>
+          {featuredSkills.length === 0 ? <p className="py-12 text-sm text-neutral-500">The index is waiting for its first published skill.</p> : <div className="mt-6 grid gap-px overflow-hidden border border-neutral-200 bg-neutral-200 sm:grid-cols-2 lg:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+            {featuredSkills.map((skill, index) => (
+              <article key={skill.id} className="group flex min-h-64 flex-col justify-between bg-neutral-50 p-6 dark:bg-neutral-950">
+                <div><div className="flex items-center justify-between text-xs text-neutral-500"><span>0{index + 1} / {isVerified(skill) ? 'Verified' : 'Listed'}</span><button onClick={() => handleFavorite(skill.id)} aria-label={`${favorites.has(skill.id) ? 'Remove' : 'Save'} ${skill.name}`} className="transition hover:text-neutral-950 dark:hover:text-white"><Bookmark className="h-4 w-4" fill={favorites.has(skill.id) ? 'currentColor' : 'none'} /></button></div><h3 className="mt-8 text-xl font-semibold tracking-tight"><Link to={`/skills/${skill.slug}`} className="hover:underline">{skill.name}</Link></h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">{skill.summary || skill.description}</p></div>
+                <div className="mt-8 flex items-center justify-between border-t border-neutral-200 pt-4 text-xs text-neutral-500 dark:border-neutral-800"><span>{skill.category || 'Uncategorised'}</span><span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" />{metric(skill, 'stars')}</span></div>
+              </article>
+            ))}
+          </div>}
         </section>
       </main>
-      <footer className="border-t border-gray-200 py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap gap-4 justify-center text-sm text-gray-500">
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">GitHub</a>
-          <Link to="/about" className="hover:text-gray-700">About</Link>
-          <Link to="/categories" className="hover:text-gray-700">Categories</Link>
-          <a href="#" className="hover:text-gray-700">Anti-Slop Principles</a>
-        </div>
-      </footer>
+      <footer className="border-t border-neutral-200 dark:border-neutral-800"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-6 text-xs text-neutral-500 lg:px-8"><span>SkillCanvas / An open directory for useful work.</span><div className="flex gap-5"><Link to="/about" className="hover:text-neutral-950 dark:hover:text-white">About</Link><Link to="/showcases" className="hover:text-neutral-950 dark:hover:text-white">Showcases</Link><a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-950 dark:hover:text-white">Source</a></div></div></footer>
     </div>
   );
 }

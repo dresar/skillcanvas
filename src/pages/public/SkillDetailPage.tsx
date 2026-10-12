@@ -1,141 +1,28 @@
-import { useParams, Link } from 'react-router-dom';
-import { Copy, Check, Star, GitFork, Download, Bookmark } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { ArrowLeft, Bookmark, Check, Copy, Download, GitFork, Star } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 import ShellHeader from '../../components/ShellHeader';
-import SkillGrid from '../../components/SkillGrid';
+import { getCategories, getFavorites, getSkillBySlug, getSkills, toggleFavorite } from '../../lib/storage';
 
-const skillData = {
-  id: '1',
-  name: 'Design Assistant',
-  version: '1.2.0',
-  verified: true,
-  description: 'Generates UI components from natural language prompts. Supports multiple design systems.',
-  installCommand: 'skillcanvas install design-assistant',
-  repository: 'https://github.com/example/design-assistant',
-  license: 'MIT',
-  lastUpdated: '2025-03-15',
-  stars: 142,
-  forks: 23,
-  downloads: 890,
-  supportedAgents: ['Antigravity', 'Claude Code', 'Cursor', 'Aider', 'Hermes'],
-  limitations: ['Requires Node.js 18+', 'Only works with React projects', 'Limited to 10 requests per minute'],
-  category: 'UI & Design',
-  imageUrl: '',
-};
-
-const relatedSkills = [
-  { id: '7', name: 'Icon Generator', description: 'Generates SVG icons from descriptions.', stars: 88, forks: 14, downloads: 410, category: 'UI & Design', verified: true, version: '1.3.0' },
-  { id: '8', name: 'Refactor Agent', description: 'Suggests code refactoring improvements.', stars: 120, forks: 20, downloads: 600, category: 'Agentic Coding', verified: true, version: '2.1.0' },
-  { id: '3', name: 'Test Generator', description: 'Creates unit tests from code.', stars: 76, forks: 8, downloads: 320, category: 'Testing', verified: false, version: '0.9.0' },
-  { id: '4', name: 'Vuln Scanner', description: 'Scans dependencies for vulnerabilities.', stars: 210, forks: 45, downloads: 1200, category: 'Security', verified: true, version: '3.1.0' },
-];
+type RecordItem = Record<string, any>;
+const metric = (skill: RecordItem, name: string) => skill.metrics?.[name] ?? skill[name] ?? 0;
+const verified = (skill: RecordItem) => Boolean(skill.verified) || skill.verificationState === 'source_inspected' || skill.verificationState === 'preview_checked';
 
 export default function SkillDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const skill = getSkillBySlug(slug || '') as RecordItem | null;
+  const skills = getSkills() as RecordItem[];
+  const categories = getCategories() as RecordItem[];
   const [copied, setCopied] = useState(false);
-  const [favorited, setFavorited] = useState(false);
+  const [favorites, setFavorites] = useState(() => new Set(getFavorites()));
+  const related = useMemo(() => skill ? skills.filter((item) => item.id !== skill.id && (item.categoryIds?.some((id: string) => skill.categoryIds?.includes(id)) || item.type === skill.type)).slice(0, 3) : [], [skill, skills]);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(skillData.installCommand);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-    }
-  };
+  if (!skill) return <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950"><ShellHeader /><main className="mx-auto max-w-3xl px-5 py-20 lg:px-8"><p className="text-sm text-neutral-500">This skill is not in the public index.</p><Link to="/skills" className="mt-4 inline-flex items-center gap-2 text-sm underline"><ArrowLeft className="h-4 w-4" /> Return to skills</Link></main></div>;
 
-  return (
-    <div className="min-h-screen bg-white">
-      <ShellHeader />
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <nav className="text-sm text-gray-500 mb-4">
-          <Link to="/" className="hover:underline">Home</Link>
-          <span className="mx-2">/</span>
-          <Link to="/skills" className="hover:underline">Skills</Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900">{skillData.name}</span>
-        </nav>
+  const installCommand = skill.installCommand || `skillcanvas install ${skill.slug}`;
+  const category = categories.find((item) => skill.categoryIds?.includes(item.id))?.name || skill.category || 'Uncategorised';
+  const copy = async () => { try { await navigator.clipboard.writeText(installCommand); setCopied(true); window.setTimeout(() => setCopied(false), 1800); } catch { setCopied(false); } };
+  const favorite = () => { toggleFavorite(skill.id); setFavorites(new Set(getFavorites())); };
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1">
-            <div className="flex items-start gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{skillData.name}</h1>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">v{skillData.version}</span>
-                  {skillData.verified && (
-                    <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Verified</span>
-                  )}
-                </div>
-                <p className="mt-3 text-gray-600">{skillData.description}</p>
-              </div>
-              <button
-                onClick={() => setFavorited(!favorited)}
-                className={`p-2 rounded-full border ${favorited ? 'border-blue-500 text-blue-500' : 'border-gray-300 text-gray-400'} hover:bg-gray-50`}
-                aria-label="Bookmark"
-              >
-                <Bookmark className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-6 flex items-center gap-3">
-              <button
-                onClick={handleCopy}
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? 'Copied!' : 'Copy Install Command'}
-              </button>
-            </div>
-
-            <div className="mt-8 aspect-video bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400">
-              Preview
-            </div>
-
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Source Info</h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p>Repository: <a href={skillData.repository} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{skillData.repository}</a></p>
-                  <p>License: {skillData.license}</p>
-                  <p>Last updated: {skillData.lastUpdated}</p>
-                </div>
-              </div>
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Metrics</h3>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <span className="flex items-center gap-1"><Star className="h-4 w-4" />{skillData.stars}</span>
-                  <span className="flex items-center gap-1"><GitFork className="h-4 w-4" />{skillData.forks}</span>
-                  <span className="flex items-center gap-1"><Download className="h-4 w-4" />{skillData.downloads}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Supported Agents</h3>
-              <div className="flex flex-wrap gap-2">
-                {skillData.supportedAgents.map((agent) => (
-                  <span key={agent} className="rounded bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">{agent}</span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Limitations / Notes</h3>
-              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                {skillData.limitations.map((lim, i) => (
-                  <li key={i}>{lim}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <section className="mt-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Related Skills</h2>
-          <SkillGrid skills={relatedSkills} viewMode="grid" />
-        </section>
-      </main>
-    </div>
-  );
+  return <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50"><ShellHeader /><main className="mx-auto max-w-7xl px-5 py-10 lg:px-8"><div className="flex items-center gap-2 text-xs text-neutral-500"><Link to="/skills" className="hover:text-neutral-950 dark:hover:text-white">Skills</Link><span>/</span><span>{category}</span></div><div className="mt-10 grid gap-12 lg:grid-cols-[1fr_320px]"><div><div className="flex items-start justify-between gap-6"><div><div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500"><span className="border border-neutral-300 px-2 py-1 dark:border-neutral-700">{category}</span>{verified(skill) && <span className="border border-neutral-950 px-2 py-1 text-neutral-950 dark:border-white dark:text-white">Verified</span>}</div><h1 className="mt-5 text-5xl font-semibold tracking-[-0.06em]">{skill.name}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-600 dark:text-neutral-400">{skill.summary || skill.description}</p></div><button onClick={favorite} aria-label="Save skill" className="border border-neutral-300 p-3 dark:border-neutral-700"><Bookmark className="h-5 w-5" fill={favorites.has(skill.id) ? 'currentColor' : 'none'} /></button></div><div className="mt-10 flex flex-wrap gap-3"><button onClick={copy} className="inline-flex items-center gap-2 bg-neutral-950 px-5 py-3 text-sm font-semibold text-white dark:bg-white dark:text-neutral-950">{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}{copied ? 'Copied' : 'Copy install command'}</button>{skill.sourceUrl && <a href={skill.sourceUrl} target="_blank" rel="noopener noreferrer" className="border border-neutral-300 px-5 py-3 text-sm font-semibold dark:border-neutral-700">Open source</a>}</div><div className="mt-12 overflow-hidden border border-neutral-200 dark:border-neutral-800"><div className="border-b border-neutral-200 bg-neutral-100 px-5 py-3 font-mono text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">Install</div><pre className="overflow-x-auto p-5 font-mono text-sm">{installCommand}</pre></div><div className="mt-10 border-y border-neutral-200 py-8 dark:border-neutral-800"><h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">About this skill</h2><p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-7 text-neutral-600 dark:text-neutral-400">{skill.description || skill.summary}</p></div><div className="mt-10 grid gap-6 sm:grid-cols-2"><section><h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Supported agents</h2><div className="mt-4 flex flex-wrap gap-2">{(skill.supportedAgents || []).map((agent: string) => <span key={agent} className="border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700">{agent}</span>)}</div></section><section><h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Tags</h2><div className="mt-4 flex flex-wrap gap-2">{(skill.tags || []).map((tag: string) => <span key={tag} className="text-xs text-neutral-500">#{tag}</span>)}</div></section></div></div><aside className="lg:border-l lg:border-neutral-200 lg:pl-8 dark:lg:border-neutral-800"><div className="grid grid-cols-3 gap-3 border-y border-neutral-200 py-5 dark:border-neutral-800"><div><Star className="h-4 w-4 text-neutral-500" /><p className="mt-2 text-xl font-semibold">{metric(skill, 'stars')}</p><p className="text-xs text-neutral-500">Stars</p></div><div><GitFork className="h-4 w-4 text-neutral-500" /><p className="mt-2 text-xl font-semibold">{metric(skill, 'forks')}</p><p className="text-xs text-neutral-500">Forks</p></div><div><Download className="h-4 w-4 text-neutral-500" /><p className="mt-2 text-xl font-semibold">{metric(skill, 'downloads')}</p><p className="text-xs text-neutral-500">Uses</p></div></div><dl className="mt-8 space-y-5 text-sm"><div><dt className="text-xs uppercase tracking-wider text-neutral-500">Version</dt><dd className="mt-1">{skill.version || 'Not specified'}</dd></div><div><dt className="text-xs uppercase tracking-wider text-neutral-500">License</dt><dd className="mt-1">{skill.license || 'Not specified'}</dd></div><div><dt className="text-xs uppercase tracking-wider text-neutral-500">Last updated</dt><dd className="mt-1">{skill.updatedAt || skill.lastUpdatedAt || 'Not specified'}</dd></div></dl>{skill.limitations?.length > 0 && <div className="mt-10 border-t border-neutral-200 pt-6 dark:border-neutral-800"><h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">Limitations</h2><ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-600 dark:text-neutral-400">{skill.limitations.map((item: string) => <li key={item}>— {item}</li>)}</ul></div>}</aside></div>{related.length > 0 && <section className="mt-20 border-t border-neutral-200 pt-8 dark:border-neutral-800"><h2 className="text-2xl font-semibold tracking-tight">Related entries</h2><div className="mt-5 grid gap-px border border-neutral-200 bg-neutral-200 sm:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">{related.map((item) => <Link key={item.id} to={`/skills/${item.slug}`} className="bg-neutral-50 p-5 hover:bg-white dark:bg-neutral-950 dark:hover:bg-neutral-900"><p className="font-semibold">{item.name}</p><p className="mt-2 line-clamp-2 text-sm text-neutral-500">{item.summary || item.description}</p></Link>)}</div></section>}</main></div>;
 }

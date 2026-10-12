@@ -1,68 +1,19 @@
+import { ArrowRight, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ShellHeader from '../../components/ShellHeader';
+import { setCurrentRole } from '../../lib/storage';
 
-const roles = [
-  { id: 'visitor', label: 'Visitor', description: 'Read-only access to skills and showcases.' },
-  { id: 'member', label: 'Member', description: 'Can contribute and manage own skills.' },
-  { id: 'admin', label: 'Admin', description: 'Full directory management privileges.' },
+type Role = 'visitor' | 'member' | 'admin';
+const roles: { id: Role; label: string; description: string }[] = [
+  { id: 'visitor', label: 'Visitor', description: 'Read the public index, skills, and showcases.' },
+  { id: 'member', label: 'Member', description: 'Contribute skills and manage your workspace.' },
+  { id: 'admin', label: 'Admin', description: 'Review submissions and manage the catalogue.' },
 ];
 
 export default function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState('visitor');
+  const [selectedRole, setSelectedRole] = useState<Role>('visitor');
   const navigate = useNavigate();
-
-  const handleEnter = () => {
-    localStorage.setItem('skillcanvas_role', selectedRole);
-    if (selectedRole === 'visitor') navigate('/skills');
-    else if (selectedRole === 'member') navigate('/dashboard');
-    else navigate('/admin');
-  };
-
-  return (
-    <div className="min-h-screen bg-white">
-      <ShellHeader />
-      <main className="max-w-md mx-auto px-4 py-16">
-        <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">Login</h1>
-        <div className="space-y-4">
-          {roles.map((role) => (
-            <label
-              key={role.id}
-              className={`block border rounded-lg p-4 cursor-pointer transition-colors ${
-                selectedRole === role.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <input
-                type="radio"
-                name="role"
-                value={role.id}
-                checked={selectedRole === role.id}
-                onChange={() => setSelectedRole(role.id)}
-                className="sr-only"
-              />
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-semibold text-gray-900">{role.label}</span>
-                  <p className="text-sm text-gray-500 mt-1">{role.description}</p>
-                </div>
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${
-                    selectedRole === role.id ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                  }`}
-                />
-              </div>
-            </label>
-          ))}
-        </div>
-        <button
-          onClick={handleEnter}
-          className="mt-8 w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Enter Workspace
-        </button>
-      </main>
-    </div>
-  );
+  const enter = () => { setCurrentRole(selectedRole); navigate(selectedRole === 'visitor' ? '/skills' : selectedRole === 'member' ? '/dashboard' : '/admin'); };
+  return <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50"><ShellHeader /><main className="mx-auto grid max-w-5xl gap-12 px-5 py-16 lg:grid-cols-[.75fr_1.25fr] lg:px-8 lg:py-24"><div><p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Enter SkillCanvas</p><h1 className="mt-4 text-5xl font-semibold tracking-[-0.06em]">Choose your workspace.</h1><p className="mt-6 max-w-sm text-sm leading-7 text-neutral-500">This demo uses role-based entry so you can explore the public directory or the contribution tools without a password.</p></div><div><div className="border-y border-neutral-200 dark:border-neutral-800">{roles.map((role) => <label key={role.id} className={`flex cursor-pointer items-center justify-between gap-6 border-b border-neutral-200 p-5 last:border-b-0 dark:border-neutral-800 ${selectedRole === role.id ? 'bg-white dark:bg-neutral-900' : ''}`}><input type="radio" name="role" value={role.id} checked={selectedRole === role.id} onChange={() => setSelectedRole(role.id)} className="sr-only" /><div><span className="font-semibold">{role.label}</span><p className="mt-1 text-sm text-neutral-500">{role.description}</p></div><span className={`flex h-5 w-5 items-center justify-center border ${selectedRole === role.id ? 'border-neutral-950 bg-neutral-950 text-white dark:border-white dark:bg-white dark:text-neutral-950' : 'border-neutral-300 dark:border-neutral-700'}`}>{selectedRole === role.id && <Check className="h-3.5 w-3.5" />}</span></label>)}</div><button onClick={enter} className="mt-6 flex min-h-12 w-full items-center justify-between bg-neutral-950 px-5 text-sm font-semibold text-white dark:bg-white dark:text-neutral-950">Enter workspace <ArrowRight className="h-4 w-4" /></button><p className="mt-5 text-xs text-neutral-500">No account or credentials are required for this demo.</p></div></main></div>;
 }

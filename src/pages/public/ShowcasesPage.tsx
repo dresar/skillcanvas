@@ -1,73 +1,16 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Monitor, Smartphone, Tablet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ShellHeader from '../../components/ShellHeader';
-import { Monitor, Tablet, Smartphone } from 'lucide-react';
+import { getSkills } from '../../lib/storage';
 
-const showcases = [
-  { id: '1', title: 'Design Assistant Demo', description: 'See how Design Assistant generates UI components.', skillId: '1' },
-  { id: '2', title: 'Code Reviewer Workflow', description: 'Automated code review in action.', skillId: '2' },
-  { id: '3', title: 'Test Generator Preview', description: 'Unit test generation from code.', skillId: '3' },
-  { id: '4', title: 'Vuln Scanner Dashboard', description: 'Vulnerability scanning results.', skillId: '4' },
-  { id: '5', title: 'Deploy Bot Pipeline', description: 'Automated deployment steps.', skillId: '5' },
-  { id: '6', title: 'Research Summarizer', description: 'Paper summarization interface.', skillId: '6' },
-  { id: '7', title: 'Icon Generator Showcase', description: 'SVG icon generation from text.', skillId: '7' },
-  { id: '8', title: 'Refactor Agent Demo', description: 'Code refactoring suggestions.', skillId: '8' },
-];
+type RecordItem = Record<string, any>;
 
 export default function ShowcasesPage() {
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const skills = getSkills() as RecordItem[];
+  const showcases = useMemo(() => skills.filter((skill) => skill.previewType && skill.previewType !== 'none' || skill.imageUrl).slice(0, 8), [skills]);
+  const maxWidth = viewport === 'desktop' ? '100%' : viewport === 'tablet' ? '768px' : '375px';
 
-  const viewportWidth = viewport === 'desktop' ? '100%' : viewport === 'tablet' ? '768px' : '375px';
-
-  return (
-    <div className="min-h-screen bg-white">
-      <ShellHeader />
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Visual Showcases</h1>
-        <p className="text-gray-600 mb-6">Interactive UI and workflow previews for AI skills.</p>
-
-        <div className="flex items-center gap-2 mb-8">
-          <button
-            onClick={() => setViewport('desktop')}
-            className={`p-2 rounded border ${viewport === 'desktop' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} hover:bg-gray-50`}
-            aria-label="Desktop view"
-          >
-            <Monitor className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setViewport('tablet')}
-            className={`p-2 rounded border ${viewport === 'tablet' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} hover:bg-gray-50`}
-            aria-label="Tablet view"
-          >
-            <Tablet className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setViewport('mobile')}
-            className={`p-2 rounded border ${viewport === 'mobile' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} hover:bg-gray-50`}
-            aria-label="Mobile view"
-          >
-            <Smartphone className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div style={{ maxWidth: viewportWidth }} className="mx-auto transition-all">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {showcases.map((sc) => (
-              <Link
-                key={sc.id}
-                to={`/skills/${sc.skillId}`}
-                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="aspect-video bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400 text-xs">
-                  Preview
-                </div>
-                <h3 className="font-semibold text-gray-900 truncate">{sc.title}</h3>
-                <p className="text-xs text-gray-500 mt-1">{sc.description}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+  return <div className="min-h-screen bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50"><ShellHeader /><main className="mx-auto max-w-7xl px-5 py-12 lg:px-8"><div className="flex flex-col justify-between gap-6 border-b border-neutral-200 pb-8 md:flex-row md:items-end dark:border-neutral-800"><div><p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">The visual index</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">Showcases</h1><p className="mt-3 max-w-xl text-sm leading-6 text-neutral-500 dark:text-neutral-400">A quiet view into how selected skills present their work, interfaces, and outputs.</p></div><div className="flex gap-1 border border-neutral-300 p-1 dark:border-neutral-700">{([{ id: 'desktop', icon: Monitor, label: 'Desktop' }, { id: 'tablet', icon: Tablet, label: 'Tablet' }, { id: 'mobile', icon: Smartphone, label: 'Mobile' }] as const).map(({ id, icon: Icon, label }) => <button key={id} onClick={() => setViewport(id)} aria-label={`${label} view`} className={`p-2 ${viewport === id ? 'bg-neutral-950 text-white dark:bg-white dark:text-neutral-950' : 'text-neutral-500'}`}><Icon className="h-4 w-4" /></button>)}</div></div><div style={{ maxWidth }} className="mx-auto mt-10 transition-all"><div className="grid gap-px border border-neutral-200 bg-neutral-200 sm:grid-cols-2 lg:grid-cols-4 dark:border-neutral-800 dark:bg-neutral-800">{showcases.map((skill, index) => <Link key={skill.id} to={`/skills/${skill.slug}`} className="group bg-neutral-50 p-4 dark:bg-neutral-950"><div className="flex aspect-video items-center justify-center overflow-hidden bg-neutral-200 text-xs text-neutral-500 dark:bg-neutral-900">{skill.imageUrl ? <img src={skill.imageUrl} alt={`${skill.name} preview`} className="h-full w-full object-cover grayscale transition duration-500 group-hover:grayscale-0" /> : <span>Preview {String(index + 1).padStart(2, '0')}</span>}</div><p className="mt-4 text-xs uppercase tracking-wider text-neutral-500">{skill.previewLabel || skill.previewType || 'Skill'}</p><h2 className="mt-2 font-semibold tracking-tight group-hover:underline">{skill.name}</h2><p className="mt-2 line-clamp-2 text-xs leading-5 text-neutral-500">{skill.summary || skill.description}</p></Link>)}</div>{showcases.length === 0 && <div className="border-y border-neutral-200 py-20 text-center text-sm text-neutral-500 dark:border-neutral-800">Published previews will appear here.</div>}</div></main></div>;
 }
